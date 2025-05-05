@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{9b38e989-918f-4230-bfc6-35701bd1502a}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>engine</TargetName>
+    <OutDir>..\..\output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>engine</TargetName>
+    <OutDir>..\..\output\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\..\code\headers;..\..\..\ray tracer\code\headers;..\..\libraries\sdl3\include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <RemoveUnreferencedCodeData>
+      </RemoveUnreferencedCodeData>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>..\..\libraries\sdl3\lib\visual-studio-2022\x64;..\..\..\ray tracer\output\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sdl3-static-d.lib;ray-tracer.lib</AdditionalDependencies>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>..\..\code\headers;..\..\..\ray tracer\code\headers;..\..\libraries\sdl3\include</AdditionalIncludeDirectories>
+      <RemoveUnreferencedCodeData>
+      </RemoveUnreferencedCodeData>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>..\..\libraries\sdl3\lib\visual-studio-2022\x64;..\..\..\ray tracer\output\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sdl3-static.lib;ray-tracer.lib</AdditionalDependencies>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\sources\Component.cpp" />
+    <ClCompile Include="..\..\code\sources\Control.cpp" />
+    <ClCompile Include="..\..\code\sources\Display_Stage.cpp" />
+    <ClCompile Include="..\..\code\sources\Input_Stage.cpp" />
+    <ClCompile Include="..\..\code\sources\Path_Tracing.cpp" />
+    <ClCompile Include="..\..\code\sources\Starter.cpp" />
+    <ClCompile Include="..\..\code\sources\Kernel.cpp" />
+    <ClCompile Include="..\..\code\sources\Transformation.cpp" />
+    <ClCompile Include="..\..\code\sources\Window.cpp" />
+    <ClCompile Include="..\..\code\sources\winmain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\headers\engine\Component.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Control.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Controller.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\declarations.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Display_Stage.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\fnv.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Id_Provider.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Input_Event.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Input_Event_Queue.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Input_Stage.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\internal\SDL_Window_Handle.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Kernel.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Key_Code.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Key_Event.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\macros.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\math.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Object_Pool.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Path_Tracing.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Registrar.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Sparse_Array.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Starter.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Entity.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Id.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Registry.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Scene.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Stage.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Subsystem.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Timer.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Transform.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Transformation.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Window.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="..\..\libraries\sdl3\lib\visual-studio-2022\x64\sdl3-static-d.pdb">
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

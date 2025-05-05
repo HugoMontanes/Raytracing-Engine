@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35818.85
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "App", "App.vcxproj", "{4D3D9BFD-4CEC-4DB4-8D06-6F7CE8B2BF59}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED} = {83B6C652-B804-4FFB-A0E7-3B75D07EDFED}
+		{9B38E989-918F-4230-BFC6-35701BD1502A} = {9B38E989-918F-4230-BFC6-35701BD1502A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "..\..\..\engine\projects\visual-studio-2022\Engine.vcxproj", "{9B38E989-918F-4230-BFC6-35701BD1502A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED} = {83B6C652-B804-4FFB-A0E7-3B75D07EDFED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ray Tracer", "..\..\..\ray tracer\projects\visual-studio-2022\Ray Tracer.vcxproj", "{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D3D9BFD-4CEC-4DB4-8D06-6F7CE8B2BF59}.Debug|x64.ActiveCfg = Debug|x64
+		{4D3D9BFD-4CEC-4DB4-8D06-6F7CE8B2BF59}.Debug|x64.Build.0 = Debug|x64
+		{4D3D9BFD-4CEC-4DB4-8D06-6F7CE8B2BF59}.Release|x64.ActiveCfg = Release|x64
+		{4D3D9BFD-4CEC-4DB4-8D06-6F7CE8B2BF59}.Release|x64.Build.0 = Release|x64
+		{9B38E989-918F-4230-BFC6-35701BD1502A}.Debug|x64.ActiveCfg = Debug|x64
+		{9B38E989-918F-4230-BFC6-35701BD1502A}.Debug|x64.Build.0 = Debug|x64
+		{9B38E989-918F-4230-BFC6-35701BD1502A}.Release|x64.ActiveCfg = Release|x64
+		{9B38E989-918F-4230-BFC6-35701BD1502A}.Release|x64.Build.0 = Release|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x64.ActiveCfg = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x64.Build.0 = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x64.ActiveCfg = Release|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D17E5994-AEED-40D7-8921-713208C679B7}
+	EndGlobalSection
+EndGlobal
