@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ¡RgB (angel.rodriguez@udit.es)
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include <engine/Input_Stage.hpp>
@@ -113,7 +113,7 @@ namespace udit::engine
                     (
                         key_events.push
                         (
-                            internal::key_code_from_sdl_key_code (event.key.key), 
+                            internal::key_code_from_sdl_key_code (event.key.key),
                             Key_Event::PRESSED
                         )
                     );
@@ -127,7 +127,7 @@ namespace udit::engine
                     (
                         key_events.push
                         (
-                            internal::key_code_from_sdl_key_code (event.key.key), 
+                            internal::key_code_from_sdl_key_code (event.key.key),
                             Key_Event::RELEASED
                         )
                     );

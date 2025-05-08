@@ -87,6 +87,8 @@
       <AdditionalIncludeDirectories>..\..\code\headers;..\..\..\ray tracer\code\headers;..\..\libraries\sdl3\include</AdditionalIncludeDirectories>
       <RemoveUnreferencedCodeData>
       </RemoveUnreferencedCodeData>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -104,7 +106,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\code\sources\Component.cpp" />
     <ClCompile Include="..\..\code\sources\Control.cpp" />
     <ClCompile Include="..\..\code\sources\Display_Stage.cpp" />
     <ClCompile Include="..\..\code\sources\Input_Stage.cpp" />

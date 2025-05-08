@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ¡RgB (angel.rodriguez@udit.es)
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include <typeinfo>
@@ -96,9 +96,9 @@ namespace udit::engine
     template< >
     Component * Subsystem::create_component< Transform >
     (
-        Entity & entity, 
-        const Vector3 & position, 
-        const Vector3 & rotation, 
+        Entity & entity,
+        const Vector3 & position,
+        const Vector3 & rotation,
         const Vector3 & scales
     )
     {

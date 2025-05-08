@@ -2,7 +2,7 @@
  * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #ifndef MACROS_HEADER
@@ -91,13 +91,15 @@
 
         #define ANDROID_OS true
 
-    #elif TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
+    #elif defined __APPLE__
 
-        #define IOS_OS true
+        #include <TargetConditionals.h>
 
-    #elif TARGET_OS_OSX
+        #if defined TARGET_OS_MAC
 
-        #define MAC_OS true
+            #define MAC_OS true
+
+        #endif
 
     #elif defined __linux__ || defined __gnu_linux__
 
@@ -133,6 +135,11 @@
         #if defined __LP64__ || defined _M_X64 || defined __aarch64__ || defined __ARM_ARCH_ISA_A64
 
             #define CPU_SUPPORTS_ARM64 true
+            #define CPU_IS_64BIT       true
+
+        #else
+
+            #define CPU_IS_32BIT       true
 
         #endif
 

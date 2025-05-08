@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ¡RgB (angel.rodriguez@udit.es)
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include <raytracer/Pinhole_Camera.hpp>
@@ -36,7 +36,7 @@ namespace udit::raytracer
         Vector3 right_direction    = transform_matrix * Vector4(half_sensor_size.x, 0, 0, 0);
         Vector3 up_direction       = transform_matrix * Vector4(0, half_sensor_size.y, 0, 0);
         Vector3 sensor_bottom_left = sensor_center - (right_direction + up_direction);
- 
+
         Vector3 horizontal_step    = right_direction / half_sensor_resolution.x;
         Vector3 vertical_step      = up_direction    / half_sensor_resolution.y;
 

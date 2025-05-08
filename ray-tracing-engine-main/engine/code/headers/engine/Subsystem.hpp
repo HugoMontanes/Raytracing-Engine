@@ -1,8 +1,8 @@
-﻿/*
+/*
  * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #pragma once
@@ -31,7 +31,7 @@ namespace udit::engine
             using Component         = COMPONENT;
             //using Object_Pool       = engine:: Object_Pool< Component >;
             //using Component_Pointer = typename Object_Pool::Pointer;
-            
+
             using Object_Pool       = std::list< Component >;
             using Component_Pointer = Component *;
 

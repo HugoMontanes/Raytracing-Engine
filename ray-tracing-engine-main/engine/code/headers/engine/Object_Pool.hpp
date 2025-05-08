@@ -1,8 +1,8 @@
-﻿/*
+/*
  * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #pragma once
@@ -96,9 +96,9 @@ namespace udit::engine
                 return  object;
             }
 
-            bool operator == (const Pointer & other) const 
+            bool operator == (const Pointer & other) const
             {
-                return this->object == other.object; 
+                return this->object == other.object;
             }
             bool operator != (const Pointer & other) const { return this->object != other.object; }
             bool operator == (const std::nullptr_t ) const { return this->object == nullptr;      }
@@ -167,7 +167,7 @@ namespace udit::engine
             index_t allocate ()
             {
                 auto index = static_cast< index_t >(std::countl_zero (bitmap));
-                    
+
                 bitmap &= ~(l_one >> index);
 
                 return index;
@@ -195,7 +195,7 @@ namespace udit::engine
             Pool() : first_free_segment{0}
             {
                 segments.reserve (pool_capacity);
-                segments.resize  (1);                    
+                segments.resize  (1);
             }
 
             index_t allocate ()
@@ -259,9 +259,9 @@ namespace udit::engine
         {
             auto index = pool.allocate ();
 
-            return 
+            return
             {
-                new (pool[index].data) Object_Type(arguments...), 
+                new (pool[index].data) Object_Type(arguments...),
                 index
             };
         }

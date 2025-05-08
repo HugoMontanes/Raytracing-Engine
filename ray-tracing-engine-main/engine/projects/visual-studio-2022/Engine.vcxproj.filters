@@ -30,9 +30,6 @@
     <ClCompile Include="..\..\code\sources\winmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\code\sources\Component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\code\sources\Transformation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

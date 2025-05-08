@@ -9,7 +9,7 @@
 
 #include <chrono>
 
-namespace udit::engine
+namespace udit::raytracer
 {
 
     class Timer

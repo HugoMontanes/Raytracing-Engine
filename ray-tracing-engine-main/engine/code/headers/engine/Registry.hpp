@@ -1,8 +1,8 @@
-﻿/*
+/*
  * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #pragma once
@@ -73,13 +73,13 @@ namespace udit::engine
     }
 
     template< class CLASS, size_t MAX_REGISTRY_SIZE >
-    const typename Registry< CLASS, MAX_REGISTRY_SIZE >::Metadata * Registry< CLASS, MAX_REGISTRY_SIZE >::metadata_by_id (Id id) 
+    const typename Registry< CLASS, MAX_REGISTRY_SIZE >::Metadata * Registry< CLASS, MAX_REGISTRY_SIZE >::metadata_by_id (Id id)
     {
         return &entries[id];
     }
 
     template< class CLASS, size_t MAX_REGISTRY_SIZE >
-    const typename Registry< CLASS, MAX_REGISTRY_SIZE >::Metadata * Registry< CLASS, MAX_REGISTRY_SIZE >::metadata_by_name (Id name_hash) 
+    const typename Registry< CLASS, MAX_REGISTRY_SIZE >::Metadata * Registry< CLASS, MAX_REGISTRY_SIZE >::metadata_by_name (Id name_hash)
     {
         for (Id index = 0, end = counter; index < end; ++index)
         {

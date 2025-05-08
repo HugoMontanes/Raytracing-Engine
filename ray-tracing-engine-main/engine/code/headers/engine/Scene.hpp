@@ -1,9 +1,9 @@
-﻿/*
-    * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
-    *
-    * Distributed under the Boost Software License, version 1.0
-    * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
-    */
+/*
+ * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
+ *
+ * Distributed under the Boost Software License, version 1.0
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
+ */
 
 #pragma once
 
@@ -70,7 +70,7 @@ namespace udit::engine
         {
             auto & subsystem = subsystems[Subsystem::id_of< COMPONENT > ()];
 
-            return subsystem ? dynamic_cast< COMPONENT * >(subsystem->get_component< COMPONENT > (entity.id)) : nullptr;
+            return subsystem ? dynamic_cast< COMPONENT * >(subsystem->template get_component< COMPONENT > (entity.id)) : nullptr;
         }
 
         template< class COMPONENT >
@@ -78,7 +78,7 @@ namespace udit::engine
         {
             auto & subsystem = subsystems[Subsystem::id_of< COMPONENT > ()];
 
-            return subsystem ? dynamic_cast< COMPONENT * >(subsystem->get_component< COMPONENT > (entity_id)) : nullptr;
+            return subsystem ? dynamic_cast< COMPONENT * >(subsystem->template get_component< COMPONENT > (entity_id)) : nullptr;
         }
 
         template< class SUBSYSTEM >
@@ -125,7 +125,7 @@ namespace udit::engine
                 initialize (subsystem, subsystem_id);
             }
 
-            return static_cast< COMPONENT * >(subsystem->create_component< COMPONENT > (entity, arguments...));
+            return static_cast< COMPONENT * >(subsystem->template create_component< COMPONENT > (entity, arguments...));
         }
 
     public:

@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35818.85 d17.13
+VisualStudioVersion = 17.13.35818.85
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine.vcxproj", "{9B38E989-918F-4230-BFC6-35701BD1502A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED} = {83B6C652-B804-4FFB-A0E7-3B75D07EDFED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ray Tracer", "..\..\..\ray tracer\projects\visual-studio-2022\Ray Tracer.vcxproj", "{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,14 @@ Global
 		{9B38E989-918F-4230-BFC6-35701BD1502A}.Release|x64.Build.0 = Release|x64
 		{9B38E989-918F-4230-BFC6-35701BD1502A}.Release|x86.ActiveCfg = Release|Win32
 		{9B38E989-918F-4230-BFC6-35701BD1502A}.Release|x86.Build.0 = Release|Win32
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x64.ActiveCfg = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x64.Build.0 = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x86.ActiveCfg = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Debug|x86.Build.0 = Debug|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x64.ActiveCfg = Release|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x64.Build.0 = Release|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x86.ActiveCfg = Release|x64
+		{83B6C652-B804-4FFB-A0E7-3B75D07EDFED}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

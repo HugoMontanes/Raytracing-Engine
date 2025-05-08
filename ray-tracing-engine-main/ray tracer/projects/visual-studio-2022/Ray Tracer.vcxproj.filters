@@ -93,6 +93,9 @@
     <ClInclude Include="..\..\code\headers\raytracer\Metallic_Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\code\headers\raytracer\Timer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\sources\Pinhole_Camera.cpp">

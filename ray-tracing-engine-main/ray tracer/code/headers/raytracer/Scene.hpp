@@ -1,8 +1,8 @@
-﻿/*
+/*
  * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #pragma once
@@ -18,7 +18,7 @@ namespace udit::raytracer
 {
 
     class Scene
-    {    
+    {
         using Camera_Ptr          = std::unique_ptr< Camera          >;
         using Material_Ptr        = std::unique_ptr< Material        >;
         using Material_List       = std::vector    < Material_Ptr    >;
@@ -129,7 +129,7 @@ namespace udit::raytracer
         if constexpr (std::is_base_of< Camera, CLASS >::value)
         {
             camera = std::make_unique< CLASS > (arguments...);
-                
+
             return static_cast< CLASS * >(camera.get ());
         }
         else

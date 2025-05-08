@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ¡RgB (angel.rodriguez@udit.es)
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include <engine/Path_Tracing.hpp>
@@ -107,7 +107,7 @@ namespace udit::engine
     template< >
     Component * Subsystem::create_component< Path_Tracing::Camera >
     (
-        Entity & entity, 
+        Entity & entity,
         const Path_Tracing::Camera::Sensor_Type & sensor_type,
         const float & focal_length
     )
@@ -157,13 +157,13 @@ namespace udit::engine
 
             subsystem->path_tracer.trace
             (
-                subsystem->path_tracer_space, 
-                viewport_width, 
-                viewport_height, 
+                subsystem->path_tracer_space,
+                viewport_width,
+                viewport_height,
                 subsystem->rays_per_pixel
             );
 
-            window.blit_rgb_float 
+            window.blit_rgb_float
             (
                 subsystem->path_tracer.get_snapshot ().data (),
                 viewport_width,

@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
+ * Copyright Â© 2025+ ÃRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include "Camera_Controller.hpp"
@@ -52,6 +52,8 @@ namespace udit
                         case KEY_RIGHT: direction.x = +1.f; break;
                         case KEY_UP:    direction.z = -1.f; break;
                         case KEY_DOWN:  direction.z = +1.f; break;
+                        default:
+                            break;
                     }
                 }
                 else
@@ -63,6 +65,8 @@ namespace udit
                         case KEY_RIGHT: if (direction.x > 0.f) direction.x = 0.f; break;
                         case KEY_UP:    if (direction.z < 0.f) direction.z = 0.f; break;
                         case KEY_DOWN:  if (direction.z > 0.f) direction.z = 0.f; break;
+                        default:
+                            break;
                     }
                 }
             }

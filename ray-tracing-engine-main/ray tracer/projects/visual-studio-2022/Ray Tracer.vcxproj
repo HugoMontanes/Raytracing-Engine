@@ -36,6 +36,7 @@
     <ClInclude Include="..\..\code\headers\raytracer\Sky_Environment.hpp" />
     <ClInclude Include="..\..\code\headers\raytracer\Spatial_Data_Structure.hpp" />
     <ClInclude Include="..\..\code\headers\raytracer\Sphere.hpp" />
+    <ClInclude Include="..\..\code\headers\raytracer\Timer.hpp" />
     <ClInclude Include="..\..\code\headers\raytracer\Transform.hpp" />
   </ItemGroup>
   <ItemGroup>

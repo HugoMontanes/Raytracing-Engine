@@ -1,8 +1,8 @@
 /*
- * Copyright © 2025+ ¡RgB (angel.rodriguez@udit.es)
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
  *
  * Distributed under the Boost Software License, version 1.0
- * See LICENSE.TXT or www.boost.org/LICENSE_1_0.txt
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
 #include <engine/Control.hpp>
@@ -39,7 +39,7 @@ namespace
         auto & entity = scene.create_entity ();
 
         scene.create_component< Transform > (entity);
-        
+
         auto model_component = scene.create_component< Path_Tracing::Model > (entity);
 
         model_component->add_plane (Vector3{0, -1, 0}, model_component->add_diffuse_material (Path_Tracing::Color(.4f, .4f, .5f)));
@@ -50,7 +50,7 @@ namespace
         auto & entity = scene.create_entity ();
 
         scene.create_component< Transform > (entity);
-        
+
         auto model_component = scene.create_component< Path_Tracing::Model > (entity);
 
         model_component->add_sphere (.25f, model_component->add_diffuse_material (Path_Tracing::Color(.8f, .8f, .8f)));

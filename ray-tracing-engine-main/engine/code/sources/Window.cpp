@@ -1,8 +1,9 @@
-
-// Este cÛdigo es de dominio p˙blico
-// angel.rodriguez@udit.es
-
-#pragma once
+/*
+ * Copyright ¬© 2025+ √ÅRgB (angel.rodriguez@udit.es)
+ *
+ * Distributed under the Boost Software License, version 1.0
+ * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
+ */
 
 #include <cassert>
 
@@ -13,7 +14,7 @@
 
 namespace udit::engine
 {
- 
+
     Window::Window(const std::string & title, unsigned width, unsigned height)
     {
         // Se hace inicializa SDL:
@@ -45,7 +46,7 @@ namespace udit::engine
         if (handle)
         {
             auto sdl_window_handle = static_cast< internal::SDL_Window_Handle * >(handle.get ());
-            
+
             SDL_DestroyWindow (sdl_window_handle->sdl_window);
         }
 
