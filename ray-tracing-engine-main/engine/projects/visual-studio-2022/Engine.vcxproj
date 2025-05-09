@@ -112,6 +112,7 @@
     <ClCompile Include="..\..\code\sources\Path_Tracing.cpp" />
     <ClCompile Include="..\..\code\sources\Starter.cpp" />
     <ClCompile Include="..\..\code\sources\Kernel.cpp" />
+    <ClCompile Include="..\..\code\sources\Task_Queue.cpp" />
     <ClCompile Include="..\..\code\sources\Transformation.cpp" />
     <ClCompile Include="..\..\code\sources\Window.cpp" />
     <ClCompile Include="..\..\code\sources\winmain.cpp" />
