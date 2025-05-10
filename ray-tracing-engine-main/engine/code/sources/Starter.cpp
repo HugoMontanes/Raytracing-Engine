@@ -10,6 +10,9 @@
 #include <mutex>
 #include <engine/Starter.hpp>
 #include <SDL3/SDL_main.h>
+#include <algorithm>
+#include <cstddef>
+#include "engine/Thread_Pool_Manager.hpp"
 
 namespace udit::engine
 {
@@ -39,12 +42,24 @@ namespace udit::engine
             SDL_SetMainReady ();
         }
 
+        size_t hardware_threads = std::thread::hardware_concurrency();
+        size_t general_threads = std::max<size_t>(2u, hardware_threads / 4);
+        size_t rendering_threads = std::max<size_t>(1u, hardware_threads - general_threads - 1);
+
+        Thread_Pool_Manager::get_instance().initialize(
+            general_threads,  // General purpose
+            rendering_threads, // Rendering
+            2,                // Loading (2 threads for asset loading)
+            1                 // Input (1 dedicated thread)
+        );
+
         return SDL_Init (0);
     }
 
     Starter::Finalizer::~Finalizer()
     {
         SDL_Quit ();
+        Thread_Pool_Manager::get_instance().shutdown();
     }
 
 }

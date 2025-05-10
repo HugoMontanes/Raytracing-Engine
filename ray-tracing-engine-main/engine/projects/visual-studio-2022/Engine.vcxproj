@@ -113,6 +113,8 @@
     <ClCompile Include="..\..\code\sources\Starter.cpp" />
     <ClCompile Include="..\..\code\sources\Kernel.cpp" />
     <ClCompile Include="..\..\code\sources\Task_Queue.cpp" />
+    <ClCompile Include="..\..\code\sources\Thread_Pool.cpp" />
+    <ClCompile Include="..\..\code\sources\Thread_Pool_Manager.cpp" />
     <ClCompile Include="..\..\code\sources\Transformation.cpp" />
     <ClCompile Include="..\..\code\sources\Window.cpp" />
     <ClCompile Include="..\..\code\sources\winmain.cpp" />
@@ -148,6 +150,7 @@
     <ClInclude Include="..\..\code\headers\engine\Task.hpp" />
     <ClInclude Include="..\..\code\headers\engine\Task_Queue.hpp" />
     <ClInclude Include="..\..\code\headers\engine\Thread_Pool.hpp" />
+    <ClInclude Include="..\..\code\headers\engine\Thread_Pool_Manager.hpp" />
     <ClInclude Include="..\..\code\headers\engine\Timer.hpp" />
     <ClInclude Include="..\..\code\headers\engine\Transform.hpp" />
     <ClInclude Include="..\..\code\headers\engine\Transformation.hpp" />
