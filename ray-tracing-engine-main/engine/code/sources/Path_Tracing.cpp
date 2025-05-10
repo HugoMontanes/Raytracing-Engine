@@ -16,6 +16,8 @@
 #include <raytracer/Sphere.hpp>
 #include <raytracer/Skydome.hpp>
 
+#include "engine/Thread_Pool_Manager.hpp"
+
 namespace udit::engine
 {
 
@@ -140,6 +142,7 @@ namespace udit::engine
         return model;
     }
 
+
     void Path_Tracing::Stage::prepare ()
     {
         subsystem = scene.get_subsystem< Path_Tracing > ();
@@ -169,6 +172,62 @@ namespace udit::engine
                 viewport_width,
                 viewport_height
             );
+
+            if (!subsystem || !subsystem->path_tracer_scene.get_camera())
+            {
+                return;
+            }
+
+            //Update component transforms
+            update_component_transforms();
+
+            //Get the rendering thread pool
+            auto& thread_pool = Thread_Pool_Manager::get_instance().get_pool(Thread_Pool_Type::RENDERING);
+
+            //Calculate optimal tile size based on thread count
+            size_t thread_count = thread_pool.get_thread_count();
+
+            //Determine number of tiles 
+            unsigned num_tiles_x = 4;
+            unsigned num_tiles_y = static_cast<unsigned>(thread_count / num_tiles_x);
+
+            //Ensure at least one tile in each dimension
+            num_tiles_x = std::max(1u, num_tiles_x);
+            num_tiles_y = std::max(1u, num_tiles_y);
+
+            //Calculate tile dimesions
+            unsigned tile_width = (viewport_width + num_tiles_x - 1) / num_tiles_x;
+            unsigned tile_height = (viewport_height + num_tiles_y - 1) / num_tiles_y;
+
+            std::vector<std::future<void>>futures;
+            futures.reserve(num_tiles_x * num_tiles_y);
+
+            // Create tasks for each tile
+            for (unsigned y = 0; y < viewport_height; y += tile_height) {
+                unsigned end_y = std::min(y + tile_height, viewport_height);
+
+                for (unsigned x = 0; x < viewport_width; x += tile_width) {
+                    unsigned end_x = std::min(x + tile_width, viewport_width);
+
+                    // Create a task for this tile
+                    auto tile_task = [this, x, y, end_x, end_y]() {
+                        // Process this tile
+                        subsystem->path_tracer.trace_tile(
+                            subsystem->path_tracer_space,
+                            x, y, end_x, end_y,
+                            subsystem->rays_per_pixel
+                        );
+                        };
+
+                    // Submit task to the thread pool
+                    futures.push_back(thread_pool.submit(Task_Priority::NORMAL, tile_task));
+                }
+            }
+
+            // Wait for all tiles to complete
+            for (auto& future : futures) {
+                future.wait();
+            }
         }
     }
 

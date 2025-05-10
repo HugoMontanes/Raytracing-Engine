@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 
 #include <engine/Entity.hpp>
 #include <engine/Stage.hpp>
@@ -23,6 +24,7 @@
 #include <raytracer/Path_Tracer.hpp>
 #include <raytracer/Scene.hpp>
 #include <raytracer/Sky_Environment.hpp>
+#include <raytracer/Buffer.hpp>
 
 namespace udit::engine
 {

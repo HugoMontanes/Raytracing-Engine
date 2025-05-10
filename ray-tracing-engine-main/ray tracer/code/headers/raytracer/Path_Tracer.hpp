@@ -9,6 +9,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <mutex>
 
 #include <raytracer/Buffer.hpp>
 #include <raytracer/Camera.hpp>
@@ -153,6 +154,27 @@ namespace udit::raytracer
             Spatial_Data_Structure & spatial_data_structure,
             const Sky_Environment  & sky_environment,
             unsigned                 depth
+        );
+
+        //Add a mutex to protect concurrent framebuffer updates
+        std::mutex framebuffer_mutex;
+
+    public:
+
+        void trace_tile(
+            Spatial_Data_Structure& space,
+            unsigned start_x, unsigned start_y,
+            unsigned end_x, unsigned end_y,
+            unsigned number_of_iterations
+        );
+
+    private:
+
+        void calculate_tile_rays(
+            Camera* camera,
+            Buffer<Ray>& rays,
+            unsigned start_x, unsigned start_y,
+            unsigned end_x, unsigned end_y
         );
 
     };
