@@ -10,6 +10,7 @@
 #include <atomic>
 #include <cstdint>
 #include <mutex>
+#include <functional>
 
 #include <raytracer/Buffer.hpp>
 #include <raytracer/Camera.hpp>
@@ -167,6 +168,19 @@ namespace udit::raytracer
             unsigned end_x, unsigned end_y,
             unsigned number_of_iterations
         );
+
+        void enable_multithreading(
+            const std::function<void(std::function<void()>)>& submit_task,
+            const std::function<void()>& wait_for_tasks
+        );
+
+        void disable_multithreading();
+
+    private:
+        // Member variables for multithreading
+        bool use_multithreading_ = false;
+        std::function<void(std::function<void()>)> submit_task_;
+        std::function<void()> wait_for_tasks_;
 
     };
 

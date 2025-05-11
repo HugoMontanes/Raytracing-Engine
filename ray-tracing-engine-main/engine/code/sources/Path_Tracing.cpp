@@ -5,6 +5,8 @@
  * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
+#include <iostream>
+
 #include <engine/Path_Tracing.hpp>
 #include <engine/Scene.hpp>
 #include <engine/Window.hpp>
@@ -158,6 +160,48 @@ namespace udit::engine
 
             update_component_transforms();
 
+            // Get the rendering thread pool
+            auto& thread_pool = engine::Thread_Pool_Manager::get_instance().get_pool(engine::Thread_Pool_Type::RENDERING);
+
+            // Test that the thread pool is working correctly
+            //std::atomic<bool> test_task_executed{ false };
+            //auto test_future = thread_pool.submit([&test_task_executed]() {
+            //    std::cout << "TEST TASK: Executing in thread "
+            //        << std::this_thread::get_id() << std::endl;
+            //    test_task_executed = true;
+            //    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Sleep to give time for active count to be visible
+            //    });
+
+            //// Wait for the test task to complete
+            //test_future.wait();
+            //std::cout << "Test task executed: " << (test_task_executed ? "YES" : "NO") << std::endl;
+
+            //std::cout << "Thread pool has " << thread_pool.get_thread_count()
+            //    << " threads, " << thread_pool.get_active_threads()
+            //    << " active, and " << thread_pool.get_queue_size()
+            //    << " tasks queued." << std::endl;
+
+            // Create a vector to store futures for all tasks
+            std::vector<std::future<void>> futures;
+            futures.reserve(100); // Reserve space for tasks to avoid reallocations
+
+            // Create a task submitter that uses our thread pool
+            auto submit_task = [&thread_pool, &futures](std::function<void()> task) {
+                auto future = thread_pool.submit(engine::Task_Priority::NORMAL, std::move(task));
+                futures.push_back(std::move(future));
+                };
+
+            // Create a task waiter
+            auto wait_for_tasks = [&futures]() {
+                for (auto& future : futures) {
+                    future.wait();
+                }
+                futures.clear();
+                };
+
+            // Enable multithreading in the path tracer
+            subsystem->path_tracer.enable_multithreading(submit_task, wait_for_tasks);
+
             subsystem->path_tracer.trace
             (
                 subsystem->path_tracer_space,
@@ -166,19 +210,15 @@ namespace udit::engine
                 subsystem->rays_per_pixel
             );
 
+            // Disable multithreading for future calls
+            subsystem->path_tracer.disable_multithreading();
+
             window.blit_rgb_float
             (
                 subsystem->path_tracer.get_snapshot().data(),
                 viewport_width,
                 viewport_height
             );
-
-            if (!subsystem || !subsystem->path_tracer_scene.get_camera())
-            {
-                return;
-            }
-
-
         }
     }
 

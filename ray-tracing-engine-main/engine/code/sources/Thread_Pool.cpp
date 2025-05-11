@@ -44,23 +44,28 @@ namespace udit::engine
 
 	void Thread_Pool::worker_function()
 	{
+
 		while (!stop_flag)
 		{
-			//Get a task form the queue
+
+			// Get a task from the queue
 			auto task = task_queue.pop();
 
 			if (task)
 			{
-				//Increment active thread counter
+
+				// Increment active thread counter
 				++active_threads;
 
-				//Execute the task
+				// Execute the task
 				task->execute();
 
-				//Decremente active threads counter
+				// Decrement active threads counter
 				--active_threads;
+
 			}
 		}
+
 	}
 
 	void Thread_Pool::wait_all()
