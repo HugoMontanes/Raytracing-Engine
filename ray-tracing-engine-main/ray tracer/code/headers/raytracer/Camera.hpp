@@ -67,6 +67,8 @@ namespace udit::raytracer
 
         virtual void calculate (Buffer< Ray > & primary_rays) = 0;
 
+
+
     };
 
 }

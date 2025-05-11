@@ -43,14 +43,15 @@ namespace udit::engine
         }
 
         size_t hardware_threads = std::thread::hardware_concurrency();
-        size_t general_threads = std::max<size_t>(2u, hardware_threads / 4);
-        size_t rendering_threads = std::max<size_t>(1u, hardware_threads - general_threads - 1);
+        unsigned rendering_threads = std::max<size_t>(1u, hardware_threads - 2);
+        unsigned input_threads = 1;         // Single thread for input processing is usually sufficient
+        unsigned general_threads = 1;       // For miscellaneous tasks
 
         Thread_Pool_Manager::get_instance().initialize(
             general_threads,  // General purpose
             rendering_threads, // Rendering
-            2,                // Loading (2 threads for asset loading)
-            1                 // Input (1 dedicated thread)
+            1,                // Loading (2 threads for asset loading)
+            input_threads                 // Input (1 dedicated thread)
         );
 
         return SDL_Init (0);
