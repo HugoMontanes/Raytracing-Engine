@@ -182,6 +182,31 @@ namespace udit::raytracer
         std::function<void(std::function<void()>)> submit_task_;
         std::function<void()> wait_for_tasks_;
 
+    private:
+
+        class Tile_Buffer
+        {
+        public:
+
+            std::vector<Color> colors;
+            std::vector<float> counters;
+
+            Tile_Buffer(size_t max_size)
+            {
+                colors.resize(max_size);
+                counters.resize(max_size);
+            }
+
+            void reset(size_t size)
+            {
+                std::fill_n(colors.begin(), size, Color(0, 0, 0));
+                std::fill_n(counters.begin(), size, 0.0f);
+            }
+        };
+
+        static thread_local Tile_Buffer tile_buffer;
+
     };
+
 
 }

@@ -16,6 +16,8 @@
 
 namespace udit::raytracer
 {
+    thread_local Path_Tracer::Tile_Buffer Path_Tracer::tile_buffer(128 * 128);
+
 
     void Path_Tracer::sample_primary_rays_stage (Frame_Data & frame_data)
     {
@@ -37,7 +39,6 @@ namespace udit::raytracer
         }
         else if(use_multithreading_)
         {
-            constexpr unsigned TILE_SIZE = 128;
 
             // Calculate number of tiles in each dimension
             unsigned width = primary_rays.get_width();
@@ -46,42 +47,59 @@ namespace udit::raytracer
             unsigned total_pixels = width * height;
             unsigned covered_pixels = 0;
 
+            unsigned TILE_SIZE;
+            if (total_pixels < 250000) // 500x500 or smaller
+                TILE_SIZE = 32;
+            else if (total_pixels < 1000000) // 1000x1000 or smaller
+                TILE_SIZE = 64;
+            else
+                TILE_SIZE = 128;
+
             unsigned tiles_x = (width + TILE_SIZE - 1) / TILE_SIZE;
             unsigned tiles_y = (height + TILE_SIZE - 1) / TILE_SIZE;
+            unsigned total_tiles = tiles_x * tiles_y;
 
-            constexpr unsigned MAX_TASKS_IN_FLIGHT = 64;
-            unsigned task_count = 0;
+            // Get number of hardware threads for adaptive task scheduling
+            unsigned available_threads = std::thread::hardware_concurrency();
+            unsigned MAX_TASKS_PER_BATCH = available_threads * 4; // Queue depth
+
+            // Process tiles in batches
+            std::vector<std::pair<unsigned, unsigned>> tile_coords;
 
             // Create and submit tasks for each tile
             for (unsigned ty = 0; ty < tiles_y; ++ty) {
                 for (unsigned tx = 0; tx < tiles_x; ++tx) {
+                    tile_coords.emplace_back(tx, ty);
+
+                }
+            }
+            for (size_t batch_start = 0; batch_start < tile_coords.size(); batch_start += MAX_TASKS_PER_BATCH) {
+                size_t batch_end = std::min(batch_start + MAX_TASKS_PER_BATCH, tile_coords.size());
+
+                // Submit this batch of tasks
+                for (size_t i = batch_start; i < batch_end; ++i) {
+                    unsigned tx = tile_coords[i].first;
+                    unsigned ty = tile_coords[i].second;
+
                     // Calculate tile bounds
                     unsigned start_x = tx * TILE_SIZE;
                     unsigned start_y = ty * TILE_SIZE;
                     unsigned end_x = std::min(start_x + TILE_SIZE, width);
                     unsigned end_y = std::min(start_y + TILE_SIZE, height);
 
-                    covered_pixels += (end_x - start_x) * (end_y - start_y);
-
-                    // Capture by value to avoid dangling references
+                    // Submit task for this tile
                     submit_task_([this, space_ptr = &frame_data.space, start_x, start_y, end_x, end_y,
                         iterations = frame_data.number_of_iterations]() {
                             trace_tile(
                                 *space_ptr,
                                 start_x, start_y,
                                 end_x, end_y,
-                                iterations);});
-
-                    if (++task_count >= MAX_TASKS_IN_FLIGHT) {
-                        wait_for_tasks_();
-                        task_count = 0;
-                    }
+                                iterations); });
                 }
+
+                // Wait for all tasks in this batch to complete
+                wait_for_tasks_();
             }
-
-
-            // Wait for all tasks to complete
-            wait_for_tasks_();
         }
     }
 
@@ -135,52 +153,57 @@ namespace udit::raytracer
             return sky_environment.sample (glm::normalize (ray.direction));
     }
 
-    void Path_Tracer::trace_tile(Spatial_Data_Structure& space, unsigned start_x, unsigned start_y, unsigned end_x, unsigned end_y, unsigned number_of_iterations)
-    {
-        static std::atomic<int> active_tiles{ 0 };
-        int current_active = ++active_tiles;
-
-
+    void Path_Tracer::trace_tile(Spatial_Data_Structure& space,
+        unsigned start_x, unsigned start_y,
+        unsigned end_x, unsigned end_y,
+        unsigned number_of_iterations) {
         auto start_time = std::chrono::high_resolution_clock::now();
 
         auto& sky_environment = *space.get_scene().get_sky_environment();
 
-        std::vector<Color> tile_colors(
-            (end_x - start_x) * (end_y - start_y), Color(0, 0, 0));
-        std::vector<float> tile_counters(
-            (end_x - start_x) * (end_y - start_y), 0.0f);
+        // Compute tile dimensions
+        unsigned tile_width = end_x - start_x;
+        unsigned tile_height = end_y - start_y;
+        unsigned tile_size = tile_width * tile_height;
+
+        // Use thread-local storage to avoid allocation
+        tile_buffer.reset(tile_size);
+
+        // Track ray count for benchmarking
+        uint64_t local_ray_count = 0;
 
         // Process all pixels in the tile without locking
         for (unsigned y = start_y; y < end_y; ++y) {
             for (unsigned x = start_x; x < end_x; ++x) {
                 unsigned buffer_index = y * primary_rays.get_width() + x;
-                unsigned tile_index = (y - start_y) * (end_x - start_x) + (x - start_x);
+                unsigned tile_index = (y - start_y) * tile_width + (x - start_x);
 
                 for (unsigned iterations = number_of_iterations; iterations > 0; --iterations) {
-                    tile_colors[tile_index] += trace_ray(
+                    tile_buffer.colors[tile_index] += trace_ray(
                         primary_rays[buffer_index], space, sky_environment, 0);
-                    tile_counters[tile_index] += 1;
+                    tile_buffer.counters[tile_index] += 1;
                 }
+
+                local_ray_count += number_of_iterations;
             }
         }
+
+        // Update benchmark counter once per tile (dramatically reduces contention)
+        benchmark.emitted_ray_count.fetch_add(local_ray_count, std::memory_order_relaxed);
+
         auto end_time = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
             end_time - start_time).count();
-
-        /*std::cout << "Tile (" << start_x << "," << start_y << ") to ("
-            << end_x << "," << end_y << ") took " << duration
-            << "ms with " << number_of_iterations << " iterations." << std::endl;*/
-
 
         // Lock once to update the framebuffer with all the tile's results
         std::lock_guard<std::mutex> lock(framebuffer_mutex);
         for (unsigned y = start_y; y < end_y; ++y) {
             for (unsigned x = start_x; x < end_x; ++x) {
                 unsigned buffer_index = y * primary_rays.get_width() + x;
-                unsigned tile_index = (y - start_y) * (end_x - start_x) + (x - start_x);
+                unsigned tile_index = (y - start_y) * tile_width + (x - start_x);
 
-                framebuffer[buffer_index] += tile_colors[tile_index];
-                ray_counters[buffer_index] += tile_counters[tile_index];
+                framebuffer[buffer_index] += tile_buffer.colors[tile_index];
+                ray_counters[buffer_index] += tile_buffer.counters[tile_index];
             }
         }
     }

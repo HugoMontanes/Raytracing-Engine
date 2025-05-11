@@ -43,7 +43,7 @@ namespace udit::engine
         }
 
         size_t hardware_threads = std::thread::hardware_concurrency();
-        unsigned rendering_threads = std::max<size_t>(1u, hardware_threads - 2);
+        unsigned rendering_threads = std::max<size_t>(1u, hardware_threads - 1);
         unsigned input_threads = 1;
         unsigned general_threads = 1;
 
