@@ -23,16 +23,20 @@ namespace udit::engine
     private:
 
         Key_Event_Pool key_events;
-        std::atomic<bool> input_processing_active;
-        std::future<void> input_task_future;
-        std::mutex input_task_mutex;
+
+        // Event processing queue
+        struct Event_Data {
+            Key_Code code;
+            Key_Event::State state;
+        };
+
+        std::queue<Event_Data> pending_events;
+        std::mutex events_mutex;
 
     public:
 
         Input_Stage(Scene& scene)
-            :Stage(scene), input_processing_active(false){}
-
-        ~Input_Stage();
+            :Stage(scene){}
 
         void prepare() override;
 
@@ -42,11 +46,7 @@ namespace udit::engine
 
     private:
 
-        void process_input_continuously();
-
-        void start_input_processing();
-
-        void stop_input_processing();
+        void process_pending_events();
     };
 
 }
