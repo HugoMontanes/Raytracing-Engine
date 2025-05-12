@@ -10,6 +10,7 @@
 #include <engine/Key_Event.hpp>
 #include <engine/Stage.hpp>
 #include <engine/Timer.hpp>
+#include <iostream>
 #include <atomic>
 #include <future>
 
