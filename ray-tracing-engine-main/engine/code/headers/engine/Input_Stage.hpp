@@ -10,6 +10,8 @@
 #include <engine/Key_Event.hpp>
 #include <engine/Stage.hpp>
 #include <engine/Timer.hpp>
+#include <atomic>
+#include <future>
 
 namespace udit::engine
 {
@@ -21,16 +23,30 @@ namespace udit::engine
     private:
 
         Key_Event_Pool key_events;
+        std::atomic<bool> input_processing_active;
+        std::future<void> input_task_future;
+        std::mutex input_task_mutex;
 
     public:
 
-        Input_Stage(Scene & scene) : Stage(scene)
-        {
-        }
+        Input_Stage(Scene& scene)
+            :Stage(scene), input_processing_active(false){}
+
+        ~Input_Stage();
+
+        void prepare() override;
 
         void compute (float) override;
 
         void cleanup () override;
+
+    private:
+
+        void process_input_continuously();
+
+        void start_input_processing();
+
+        void stop_input_processing();
     };
 
 }

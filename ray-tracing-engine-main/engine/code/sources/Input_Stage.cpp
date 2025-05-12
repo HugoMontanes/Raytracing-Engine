@@ -7,7 +7,9 @@
 
 #include <engine/Input_Stage.hpp>
 #include <engine/Scene.hpp>
+#include <engine/Thread_Pool_Manager.hpp>
 
+#include <iostream>
 #include <SDL3/SDL.h>
 
 namespace udit::engine
@@ -99,56 +101,135 @@ namespace udit::engine
         return Stage::setup< Input_Stage > ();
     }
 
+    Input_Stage::~Input_Stage()
+    {
+        stop_input_processing();
+    }
+
+
     void Input_Stage::compute (float)
     {
-        SDL_Event event;
+        // Check if the input processing task is running
+        std::lock_guard<std::mutex> lock(input_task_mutex);
 
-        while (SDL_PollEvent (&event))
+        if (!input_processing_active && input_task_future.valid())
         {
-            switch (event.type)
+            // Check if the task has completed unexpectedly
+            auto status = input_task_future.wait_for(std::chrono::milliseconds(0));
+
+            if (status == std::future_status::ready)
             {
-                case SDL_EVENT_KEY_DOWN:
-                {
-                    scene.get_input_event_queue ().push
-                    (
-                        key_events.push
-                        (
-                            internal::key_code_from_sdl_key_code (event.key.key),
-                            Key_Event::PRESSED
-                        )
-                    );
-
-                    break;
+                try {
+                    // Get the result to catch any exceptions
+                    input_task_future.get();
+                }
+                catch (const std::exception& e) {
+                    std::cerr << "Input processing task failed: " << e.what() << std::endl;
                 }
 
-                case SDL_EVENT_KEY_UP:
-                {
-                    scene.get_input_event_queue ().push
-                    (
-                        key_events.push
-                        (
-                            internal::key_code_from_sdl_key_code (event.key.key),
-                            Key_Event::RELEASED
-                        )
-                    );
-
-                    break;
-                }
-
-                case SDL_EVENT_QUIT:
-                {
-                    scene.stop ();
-                    break;
-                }
+                // Restart the input processing
+                start_input_processing();
             }
+        }
+        else if (!input_processing_active)
+        {
+            // Start the input processing if it's not running
+            start_input_processing();
         }
     }
 
     void Input_Stage::cleanup ()
     {
-        scene.get_input_event_queue ().clear ();
+        stop_input_processing();
+        scene.get_input_event_queue().clear();
+        key_events.clear();
+    }
 
-        key_events.clear ();
+    void Input_Stage::prepare()
+    {
+        start_input_processing();
+    }
+
+    void Input_Stage::process_input_continuously()
+    {
+        SDL_Event event;
+
+        while (input_processing_active)
+        {
+            while (SDL_PollEvent(&event))
+            {
+                switch (event.type)
+                {
+                    case SDL_EVENT_KEY_DOWN:
+                    {
+                        scene.get_input_event_queue().push(
+                            key_events.push(
+                                internal::key_code_from_sdl_key_code(event.key.key),
+                                Key_Event::PRESSED
+                            )
+                        );
+                        break;
+
+                    }
+
+                    case SDL_EVENT_KEY_UP:
+                    {
+
+                        scene.get_input_event_queue().push(
+                            key_events.push(
+                                internal::key_code_from_sdl_key_code(event.key.key),
+                                Key_Event::RELEASED
+                            )
+                        );
+                        break;
+                    }
+                }
+            }
+            //Small sleep to prevent CPU hogging
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+    }
+
+    void Input_Stage::start_input_processing()
+    {
+        std::lock_guard<std::mutex> lock(input_task_mutex);
+
+        if (!input_processing_active)
+        {
+            input_processing_active = true;
+
+            //Get the input thread pool
+            auto& input_pool = Thread_Pool_Manager::get_instance().get_pool(Thread_Pool_Type::INPUT);
+
+            //Submit the continuous input processing task
+            input_task_future = input_pool.submit(
+                Task_Priority::HIGH,
+                [this]() {process_input_continuously(); }
+            );
+        }
+    }
+
+    void Input_Stage::stop_input_processing()
+    {
+        std::lock_guard<std::mutex> lock(input_task_mutex);
+
+        if (input_processing_active)
+        {
+            input_processing_active = false;
+
+            //Wait for the task to finish
+            if (input_task_future.valid())
+            {
+                try
+                {
+                    input_task_future.wait();
+                }
+                catch (const std::exception& e)
+                {
+                    std::cerr << "Exception in input processing task: " << e.what() << std::endl;
+                }
+            }
+        }
     }
 
 }

@@ -9,6 +9,7 @@
 
 #include <queue>
 #include <typeinfo>
+#include <mutex>
 
 #include <engine/Timer.hpp>
 
@@ -26,27 +27,33 @@ namespace udit::engine
         private:
 
             Input_Event_Queue queue;
+            mutable std::mutex queue_mutex;
 
         public:
 
             size_t length () const
             {
+                std::lock_guard<std::mutex> lock(queue_mutex);
                 return queue.size ();
             }
 
             void clear ()
             {
+                std::lock_guard<std::mutex> lock(queue_mutex);
                 Input_Event_Queue empty;
                 queue.swap (empty);
             }
 
             void push (Input_Event * event)
             {
+                std::lock_guard<std::mutex> lock(queue_mutex);
                 queue.push (event);
             }
 
             Input_Event * poll ()
             {
+                std::lock_guard<std::mutex> lock(queue_mutex);
+
                 if (queue.empty ()) return nullptr;
 
                 auto event = queue.front ();
