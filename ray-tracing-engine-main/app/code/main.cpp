@@ -5,6 +5,8 @@
  * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
  */
 
+#include <iostream>
+
 #include <engine/Control.hpp>
 #include <engine/Key_Event.hpp>
 #include <engine/Path_Tracing.hpp>
@@ -12,6 +14,7 @@
 #include <engine/Scene.hpp>
 #include <engine/Window.hpp>
 #include <engine/Entity.hpp>
+#include <engine/Thread_Pool_Manager.hpp>
 
 #include "Camera_Controller.hpp"
 
@@ -56,11 +59,51 @@ namespace
         model_component->add_sphere (.25f, model_component->add_diffuse_material (Path_Tracing::Color(.8f, .8f, .8f)));
     }
 
-    void load (Scene & scene)
+    void load_concurrently (Scene & scene)
     {
-        load_camera (scene);
-        load_ground (scene);
-        load_shape  (scene);
+        //Get loading thread pool
+        auto& loading_pool = Thread_Pool_Manager::get_instance().get_pool(Thread_Pool_Type::LOADING);
+
+        //Create a vector to store futures
+        std::vector<std::future<void>> loading_futures;
+
+        //Load camera task
+        loading_futures.push_back(
+            loading_pool.submit([&scene]()
+                {
+                    std::cout << "Loading camera on thread: " << std::this_thread::get_id() << std::endl;
+                    load_camera(scene);
+                    std::cout << "Camera loaded" << std::endl;
+                })
+        );
+
+        //Load ground task
+        loading_futures.push_back(
+            loading_pool.submit([&scene]() {
+                std::cout << "Loading ground on thread: " << std::this_thread::get_id() << std::endl;
+                load_ground(scene);
+                std::cout << "Ground loaded" << std::endl;
+                })
+        );
+
+        // Load shape task
+        loading_futures.push_back(
+            loading_pool.submit([&scene]() {
+                std::cout << "Loading shape on thread: " << std::this_thread::get_id() << std::endl;
+                load_shape(scene);
+                std::cout << "Shape loaded" << std::endl;
+                })
+        );
+
+        //Wait for all loading tasks to complete
+        std::cout << "Waiting for all scene components to load..." << std::endl;
+
+        for (auto& future : loading_futures)
+        {
+            future.wait(); //Block until each task is complete
+        }
+
+        std::cout << "All scene components loaded successfully" << std::endl;
     }
 
     void engine_application ()
@@ -69,7 +112,7 @@ namespace
 
         Scene scene(window);
 
-        load (scene);
+        load_concurrently (scene);
 
         scene.run ();
     }
