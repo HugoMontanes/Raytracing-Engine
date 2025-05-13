@@ -150,7 +150,7 @@ namespace udit::engine
         subsystem = scene.get_subsystem< Path_Tracing > ();
     }
 
-    void Path_Tracing::Stage::compute (float)
+    void Path_Tracing::Stage::compute(float)
     {
         if (subsystem)
         {
@@ -162,24 +162,6 @@ namespace udit::engine
 
             // Get the rendering thread pool
             auto& thread_pool = engine::Thread_Pool_Manager::get_instance().get_pool(engine::Thread_Pool_Type::RENDERING);
-
-            // Test that the thread pool is working correctly
-            //std::atomic<bool> test_task_executed{ false };
-            //auto test_future = thread_pool.submit([&test_task_executed]() {
-            //    std::cout << "TEST TASK: Executing in thread "
-            //        << std::this_thread::get_id() << std::endl;
-            //    test_task_executed = true;
-            //    std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Sleep to give time for active count to be visible
-            //    });
-
-            //// Wait for the test task to complete
-            //test_future.wait();
-            //std::cout << "Test task executed: " << (test_task_executed ? "YES" : "NO") << std::endl;
-
-            //std::cout << "Thread pool has " << thread_pool.get_thread_count()
-            //    << " threads, " << thread_pool.get_active_threads()
-            //    << " active, and " << thread_pool.get_queue_size()
-            //    << " tasks queued." << std::endl;
 
             // Create a vector to store futures for all tasks
             std::vector<std::future<void>> futures;
@@ -199,6 +181,12 @@ namespace udit::engine
                 futures.clear();
                 };
 
+            // Enable multithreading for the camera's primary ray generation
+            auto camera = subsystem->path_tracer_scene.get_camera();
+            if (auto pinhole_camera = dynamic_cast<raytracer::Pinhole_Camera*>(camera)) {
+                pinhole_camera->enable_multithreading(submit_task, wait_for_tasks);
+            }
+
             // Enable multithreading in the path tracer
             subsystem->path_tracer.enable_multithreading(submit_task, wait_for_tasks);
 
@@ -212,6 +200,10 @@ namespace udit::engine
 
             // Disable multithreading for future calls
             subsystem->path_tracer.disable_multithreading();
+
+            if (auto pinhole_camera = dynamic_cast<raytracer::Pinhole_Camera*>(camera)) {
+                pinhole_camera->disable_multithreading();
+            }
 
             window.blit_rgb_float
             (

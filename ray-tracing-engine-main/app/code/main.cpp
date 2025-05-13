@@ -118,7 +118,6 @@ namespace
     }
 
 }
-
 int main (int , char * [])
 {
     engine::starter.run (engine_application);
