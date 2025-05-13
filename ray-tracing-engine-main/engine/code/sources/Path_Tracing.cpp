@@ -105,7 +105,11 @@ namespace udit::engine
         path_tracer_space(path_tracer_scene),
         rays_per_pixel(1)
     {
-        path_tracer_scene.create< raytracer::Skydome > (raytracer::Color{.5f, .75f, 1.f}, raytracer::Color{1, 1, 1});
+        path_tracer_scene.create<raytracer::Skydome>(
+            raytracer::Color{ .5f, .75f, 1.f },
+            raytracer::Color{ 1, 1, 1 });
+
+        last_display_time = std::chrono::steady_clock::now();
     }
 
     template< >
@@ -158,6 +162,26 @@ namespace udit::engine
             auto   viewport_width = window.get_width();
             auto   viewport_height = window.get_height();
 
+            // First, check if it's time to display a frame (25fps timing)
+            auto now = std::chrono::steady_clock::now();
+            auto time_since_last_display = std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - subsystem->last_display_time);
+
+            bool should_display = time_since_last_display >= subsystem->frame_duration;
+
+            if (should_display && subsystem->new_frame_ready)
+            {
+                // Display the completed frame (this happens on main thread as required by SDL)
+                std::lock_guard<std::mutex> lock(subsystem->frame_mutex);
+                window.blit_rgb_float(
+                    subsystem->completed_frame.data(),
+                    viewport_width,
+                    viewport_height
+                );
+                subsystem->last_display_time = now;
+                subsystem->new_frame_ready = false;
+            }
+
             update_component_transforms();
 
             // Get the rendering thread pool
@@ -190,13 +214,25 @@ namespace udit::engine
             // Enable multithreading in the path tracer
             subsystem->path_tracer.enable_multithreading(submit_task, wait_for_tasks);
 
-            subsystem->path_tracer.trace
-            (
-                subsystem->path_tracer_space,
-                viewport_width,
-                viewport_height,
-                subsystem->rays_per_pixel
-            );
+            // Submit the main rendering task to run asynchronously
+            auto render_future = thread_pool.submit(engine::Task_Priority::HIGH,
+                [&subsystem = *subsystem, viewport_width, viewport_height]() {
+                    subsystem.path_tracer.trace(
+                        subsystem.path_tracer_space,
+                        viewport_width,
+                        viewport_height,
+                        subsystem.rays_per_pixel
+                    );
+
+                    // When rendering is complete, copy to the completed frame buffer
+                    std::lock_guard<std::mutex> lock(subsystem.frame_mutex);
+                    auto& snapshot = subsystem.path_tracer.get_snapshot();
+                    subsystem.completed_frame.resize(viewport_width, viewport_height);
+                    std::copy(snapshot.data(),
+                        snapshot.data() + snapshot.size(),
+                        subsystem.completed_frame.data());
+                    subsystem.new_frame_ready = true;
+                });
 
             // Disable multithreading for future calls
             subsystem->path_tracer.disable_multithreading();
@@ -204,13 +240,6 @@ namespace udit::engine
             if (auto pinhole_camera = dynamic_cast<raytracer::Pinhole_Camera*>(camera)) {
                 pinhole_camera->disable_multithreading();
             }
-
-            window.blit_rgb_float
-            (
-                subsystem->path_tracer.get_snapshot().data(),
-                viewport_width,
-                viewport_height
-            );
         }
     }
 

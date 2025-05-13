@@ -33,6 +33,17 @@ namespace udit::engine
     {
     public:
 
+        //Display timing for stable 25fps
+        std::chrono::steady_clock::time_point last_display_time;
+        const std::chrono::milliseconds frame_duration{ 40 };
+
+        //Frame-ready flag
+        std::atomic<bool> new_frame_ready{ false };
+        std::mutex frame_mutex;
+
+        //Separate completed frame buffer
+        raytracer::Buffer<raytracer::Color> completed_frame;
+
         class Stage : public engine::Stage
         {
             Path_Tracing * subsystem;
