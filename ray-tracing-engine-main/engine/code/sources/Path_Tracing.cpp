@@ -216,25 +216,54 @@ namespace udit::engine
 
     void Path_Tracing::Stage::update_component_transforms ()
     {
-        static int it = 0;
+        // Get the rendering thread pool
+        auto& thread_pool = engine::Thread_Pool_Manager::get_instance().get_pool(engine::Thread_Pool_Type::RENDERING);
 
-        for (auto & camera : subsystem->camera_components)
+        // Vector to store futures for synchronization
+        std::vector<std::future<void>> futures;
+
+        // Create a task submitter function
+        auto submit_task = [&thread_pool, &futures](std::function<void()> task) {
+            auto future = thread_pool.submit(engine::Task_Priority::HIGH, std::move(task));
+            futures.push_back(std::move(future));
+            };
+
+        // Create a task waiter function
+        auto wait_for_tasks = [&futures]() {
+            for (auto& future : futures) {
+                future.wait();
+            }
+            futures.clear();
+            };
+
+        // Process each camera in parallel
+        for (auto& camera : subsystem->camera_components)
         {
-            auto transform = subsystem->scene.get_component< Transform > (camera.entity_id);
-
-            camera.instance->transform.set_position (transform->position);
-            camera.instance->transform.set_rotation (transform->rotation);
-            camera.instance->transform.set_scales   (transform->scales  );
+            submit_task([this, &camera]() {
+                auto transform = subsystem->scene.get_component<Transform>(camera.entity_id);
+                if (transform) {
+                    camera.instance->transform.set_position(transform->position);
+                    camera.instance->transform.set_rotation(transform->rotation);
+                    camera.instance->transform.set_scales(transform->scales);
+                }
+                });
         }
 
-        for (auto & model : subsystem->camera_components)
+        // Process each model in parallel (fixed to use model_components instead of camera_components)
+        for (auto& model : subsystem->model_components)
         {
-            auto transform = subsystem->scene.get_component< Transform > (model.entity_id);
-
-            model.instance->transform.set_position (transform->position);
-            model.instance->transform.set_rotation (transform->rotation);
-            model.instance->transform.set_scales   (transform->scales  );
+            submit_task([this, &model]() {
+                auto transform = subsystem->scene.get_component<Transform>(model.entity_id);
+                if (transform) {
+                    model.instance->transform.set_position(transform->position);
+                    model.instance->transform.set_rotation(transform->rotation);
+                    model.instance->transform.set_scales(transform->scales);
+                }
+                });
         }
+
+        // Wait for all tasks to complete
+        wait_for_tasks();
     }
 
     Path_Tracing::Material * Path_Tracing::Model::add_diffuse_material  (const Color & color)
