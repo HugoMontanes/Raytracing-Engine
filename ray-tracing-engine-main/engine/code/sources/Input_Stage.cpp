@@ -50,80 +50,71 @@ namespace udit::engine
                 << get_thread_id() << "] "
                 << function << ": " << message << std::endl;
         }
-
-        // Your existing key_code_from_sdl_key_code function
-        static Key_Code key_code_from_sdl_key_code(SDL_Keycode sdl_key_code)
-        {
-            switch (sdl_key_code)
-            {
-            case SDLK_A:     return KEY_A;
-            case SDLK_B:     return KEY_B;
-            case SDLK_C:     return KEY_C;
-            case SDLK_D:     return KEY_D;
-            case SDLK_E:     return KEY_E;
-            case SDLK_F:     return KEY_F;
-            case SDLK_G:     return KEY_G;
-            case SDLK_H:     return KEY_H;
-            case SDLK_I:     return KEY_I;
-            case SDLK_J:     return KEY_J;
-            case SDLK_K:     return KEY_K;
-            case SDLK_L:     return KEY_L;
-            case SDLK_M:     return KEY_M;
-            case SDLK_N:     return KEY_N;
-            case SDLK_O:     return KEY_O;
-            case SDLK_P:     return KEY_P;
-            case SDLK_Q:     return KEY_Q;
-            case SDLK_R:     return KEY_R;
-            case SDLK_S:     return KEY_S;
-            case SDLK_T:     return KEY_T;
-            case SDLK_U:     return KEY_U;
-            case SDLK_V:     return KEY_V;
-            case SDLK_W:     return KEY_W;
-            case SDLK_X:     return KEY_X;
-            case SDLK_Y:     return KEY_Y;
-            case SDLK_Z:     return KEY_Z;
-            case SDLK_0:     return KEY_0;
-            case SDLK_1:     return KEY_1;
-            case SDLK_2:     return KEY_2;
-            case SDLK_3:     return KEY_3;
-            case SDLK_4:     return KEY_4;
-            case SDLK_5:     return KEY_5;
-            case SDLK_6:     return KEY_6;
-            case SDLK_7:     return KEY_7;
-            case SDLK_8:     return KEY_8;
-            case SDLK_9:     return KEY_9;
-            case SDLK_LEFT:  return KEY_LEFT;
-            case SDLK_RIGHT: return KEY_RIGHT;
-            case SDLK_UP:    return KEY_UP;
-            case SDLK_DOWN:  return KEY_DOWN;
-            }
-            return UNDEFINED;
-        }
     }
 
-    // Remove the constructor definition since it's already inline in the header
-    // Constructor is already defined in the header as:
-    // Input_Stage(Scene & scene) : Stage(scene) {}
+    // Convert SDL scancode to our Key_Code enum
+    Key_Code Input_Stage::scancode_to_key_code(SDL_Scancode scancode)
+    {
+        switch (scancode)
+        {
+        case SDL_SCANCODE_A: return KEY_A;
+        case SDL_SCANCODE_B: return KEY_B;
+        case SDL_SCANCODE_C: return KEY_C;
+        case SDL_SCANCODE_D: return KEY_D;
+        case SDL_SCANCODE_E: return KEY_E;
+        case SDL_SCANCODE_F: return KEY_F;
+        case SDL_SCANCODE_G: return KEY_G;
+        case SDL_SCANCODE_H: return KEY_H;
+        case SDL_SCANCODE_I: return KEY_I;
+        case SDL_SCANCODE_J: return KEY_J;
+        case SDL_SCANCODE_K: return KEY_K;
+        case SDL_SCANCODE_L: return KEY_L;
+        case SDL_SCANCODE_M: return KEY_M;
+        case SDL_SCANCODE_N: return KEY_N;
+        case SDL_SCANCODE_O: return KEY_O;
+        case SDL_SCANCODE_P: return KEY_P;
+        case SDL_SCANCODE_Q: return KEY_Q;
+        case SDL_SCANCODE_R: return KEY_R;
+        case SDL_SCANCODE_S: return KEY_S;
+        case SDL_SCANCODE_T: return KEY_T;
+        case SDL_SCANCODE_U: return KEY_U;
+        case SDL_SCANCODE_V: return KEY_V;
+        case SDL_SCANCODE_W: return KEY_W;
+        case SDL_SCANCODE_X: return KEY_X;
+        case SDL_SCANCODE_Y: return KEY_Y;
+        case SDL_SCANCODE_Z: return KEY_Z;
+        case SDL_SCANCODE_0: return KEY_0;
+        case SDL_SCANCODE_1: return KEY_1;
+        case SDL_SCANCODE_2: return KEY_2;
+        case SDL_SCANCODE_3: return KEY_3;
+        case SDL_SCANCODE_4: return KEY_4;
+        case SDL_SCANCODE_5: return KEY_5;
+        case SDL_SCANCODE_6: return KEY_6;
+        case SDL_SCANCODE_7: return KEY_7;
+        case SDL_SCANCODE_8: return KEY_8;
+        case SDL_SCANCODE_9: return KEY_9;
+        case SDL_SCANCODE_LEFT: return KEY_LEFT;
+        case SDL_SCANCODE_RIGHT: return KEY_RIGHT;
+        case SDL_SCANCODE_UP: return KEY_UP;
+        case SDL_SCANCODE_DOWN: return KEY_DOWN;
+        default: return UNDEFINED;
+        }
+    }
 
     void Input_Stage::prepare()
     {
         internal::debug_log("Input_Stage::prepare", "Starting preparation");
 
-        // Clear any existing state to ensure clean start
+        // Clear any existing state
         scene.get_input_event_queue().clear();
         key_events.clear();
 
-        internal::debug_log("Input_Stage::prepare", "Cleared scene and key event queues");
+        // Initialize keyboard state tracking
+        current_key_state = SDL_GetKeyboardState(&num_keys);
+        previous_key_state.resize(num_keys, 0);
 
-        // Clear pending events
-        {
-            std::lock_guard<std::mutex> lock(events_mutex);
-            std::queue<Event_Data> empty;
-            pending_events.swap(empty);
-            internal::debug_log("Input_Stage::prepare", "Cleared pending events queue");
-        }
-
-        internal::debug_log("Input_Stage::prepare", "Preparation completed");
+        internal::debug_log("Input_Stage::prepare", "Preparation completed with " +
+            std::to_string(num_keys) + " keyboard keys to track");
     }
 
     void Input_Stage::compute(float delta_time)
@@ -148,73 +139,40 @@ namespace udit::engine
             last_log_time = now;
         }
 
+        // Process non-keyboard SDL events (like QUIT)
+        process_sdl_events();
+
+        // Process keyboard state
+        process_keyboard_state();
+    }
+
+    void Input_Stage::process_sdl_events()
+    {
         SDL_Event event;
         int event_count = 0;
 
-        // Poll all SDL events on the main thread
+        // Poll all non-keyboard SDL events
         while (SDL_PollEvent(&event))
         {
             event_count++;
 
             switch (event.type)
             {
-            case SDL_EVENT_KEY_DOWN:
-            {
-                auto key_code = internal::key_code_from_sdl_key_code(event.key.key);
-
-                std::stringstream msg;
-                msg << "KEY_DOWN - code: " << key_code
-                    << ", SDL key: " << event.key.key;
-                internal::debug_log("Input_Stage::compute", msg.str());
-
-                Event_Data data{ key_code, Key_Event::PRESSED };
-
-                {
-                    std::lock_guard<std::mutex> lock(events_mutex);
-                    pending_events.push(data);
-                    internal::debug_log("Input_Stage::compute",
-                        "Added KEY_DOWN to pending_events (size: " +
-                        std::to_string(pending_events.size()) + ")");
-                }
-                break;
-            }
-
-            case SDL_EVENT_KEY_UP:
-            {
-                auto key_code = internal::key_code_from_sdl_key_code(event.key.key);
-
-                std::stringstream msg;
-                msg << "KEY_UP - code: " << key_code
-                    << ", SDL key: " << event.key.key;
-                internal::debug_log("Input_Stage::compute", msg.str());
-
-                Event_Data data{ key_code, Key_Event::RELEASED };
-
-                {
-                    std::lock_guard<std::mutex> lock(events_mutex);
-                    pending_events.push(data);
-                    internal::debug_log("Input_Stage::compute",
-                        "Added KEY_UP to pending_events (size: " +
-                        std::to_string(pending_events.size()) + ")");
-                }
-                break;
-            }
-
             case SDL_EVENT_QUIT:
             {
-                internal::debug_log("Input_Stage::compute", "QUIT event received");
+                internal::debug_log("Input_Stage::process_sdl_events", "QUIT event received");
                 scene.stop();
                 break;
             }
 
             default:
             {
-                // Log other event types for debugging
-                if (event_count == 1) // Only log first few to avoid spam
+                // Log other event types for debugging (limit to avoid spam)
+                if (event_count <= 3)
                 {
                     std::stringstream msg;
                     msg << "Other SDL event type: " << event.type;
-                    internal::debug_log("Input_Stage::compute", msg.str());
+                    internal::debug_log("Input_Stage::process_sdl_events", msg.str());
                 }
                 break;
             }
@@ -224,62 +182,121 @@ namespace udit::engine
         if (event_count > 0)
         {
             std::stringstream msg;
-            msg << "Polled " << event_count << " SDL events this frame";
-            internal::debug_log("Input_Stage::compute", msg.str());
+            msg << "Processed " << event_count << " non-keyboard SDL events";
+            internal::debug_log("Input_Stage::process_sdl_events", msg.str());
         }
-
-        // Process the accumulated events
-        process_pending_events();
     }
 
-    void Input_Stage::process_pending_events()
+    void Input_Stage::process_keyboard_state()
     {
-        std::queue<Event_Data> events_to_process;
-        size_t original_size = 0;
+        // Get current keyboard state
+        current_key_state = SDL_GetKeyboardState(NULL);
 
-        // Quickly swap the queues to minimize lock time
+        int key_change_count = 0;
+
+        // Check for changes in key states
+        for (int i = 0; i < num_keys; i++)
         {
-            std::lock_guard<std::mutex> lock(events_mutex);
-            original_size = pending_events.size();
+            // Only process scancodes we care about (convert to our Key_Code enum)
+            Key_Code key_code = scancode_to_key_code(static_cast<SDL_Scancode>(i));
+            if (key_code == UNDEFINED)
+                continue;
 
-            if (original_size > 0)
+            // Key was just pressed (not pressed before, pressed now)
+            if (previous_key_state[i] == 0 && current_key_state[i] != 0)
             {
-                events_to_process.swap(pending_events);
+                key_change_count++;
 
                 std::stringstream msg;
-                msg << "Swapped " << original_size << " events from pending_events";
-                internal::debug_log("Input_Stage::process_pending_events", msg.str());
+                msg << "KEY_DOWN - code: " << key_code;
+                internal::debug_log("Input_Stage::process_keyboard_state", msg.str());
+
+                scene.get_input_event_queue().push(
+                    key_events.push(key_code, Key_Event::PRESSED)
+                );
             }
+            // Key was just released (pressed before, not pressed now)
+            else if (previous_key_state[i] != 0 && current_key_state[i] == 0)
+            {
+                key_change_count++;
+
+                std::stringstream msg;
+                msg << "KEY_UP - code: " << key_code;
+                internal::debug_log("Input_Stage::process_keyboard_state", msg.str());
+
+                scene.get_input_event_queue().push(
+                    key_events.push(key_code, Key_Event::RELEASED)
+                );
+            }
+
+            // Update previous state
+            previous_key_state[i] = current_key_state[i];
         }
 
-        if (original_size == 0)
+        if (key_change_count > 0)
         {
-            return; // Nothing to process
-        }
-
-        // Process all events
-        int processed_count = 0;
-        while (!events_to_process.empty())
-        {
-            const auto& event = events_to_process.front();
-
-            // Push to the scene's input event queue
-            scene.get_input_event_queue().push(
-                key_events.push(event.code, event.state)
-            );
-
             std::stringstream msg;
-            msg << "Pushed event to scene queue - code: " << event.code
-                << ", state: " << (event.state == Key_Event::PRESSED ? "PRESSED" : "RELEASED");
-            internal::debug_log("Input_Stage::process_pending_events", msg.str());
+            msg << "Processed " << key_change_count << " keyboard state changes";
+            internal::debug_log("Input_Stage::process_keyboard_state", msg.str());
+        }
+    }
 
-            processed_count++;
-            events_to_process.pop();
+    bool Input_Stage::is_key_pressed(Key_Code key_code)
+    {
+        // Convert our Key_Code to SDL scancode
+        SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
+
+        switch (key_code)
+        {
+        case KEY_A: scancode = SDL_SCANCODE_A; break;
+        case KEY_B: scancode = SDL_SCANCODE_B; break;
+        case KEY_C: scancode = SDL_SCANCODE_C; break;
+        case KEY_D: scancode = SDL_SCANCODE_D; break;
+        case KEY_E: scancode = SDL_SCANCODE_E; break;
+        case KEY_F: scancode = SDL_SCANCODE_F; break;
+        case KEY_G: scancode = SDL_SCANCODE_G; break;
+        case KEY_H: scancode = SDL_SCANCODE_H; break;
+        case KEY_I: scancode = SDL_SCANCODE_I; break;
+        case KEY_J: scancode = SDL_SCANCODE_J; break;
+        case KEY_K: scancode = SDL_SCANCODE_K; break;
+        case KEY_L: scancode = SDL_SCANCODE_L; break;
+        case KEY_M: scancode = SDL_SCANCODE_M; break;
+        case KEY_N: scancode = SDL_SCANCODE_N; break;
+        case KEY_O: scancode = SDL_SCANCODE_O; break;
+        case KEY_P: scancode = SDL_SCANCODE_P; break;
+        case KEY_Q: scancode = SDL_SCANCODE_Q; break;
+        case KEY_R: scancode = SDL_SCANCODE_R; break;
+        case KEY_S: scancode = SDL_SCANCODE_S; break;
+        case KEY_T: scancode = SDL_SCANCODE_T; break;
+        case KEY_U: scancode = SDL_SCANCODE_U; break;
+        case KEY_V: scancode = SDL_SCANCODE_V; break;
+        case KEY_W: scancode = SDL_SCANCODE_W; break;
+        case KEY_X: scancode = SDL_SCANCODE_X; break;
+        case KEY_Y: scancode = SDL_SCANCODE_Y; break;
+        case KEY_Z: scancode = SDL_SCANCODE_Z; break;
+        case KEY_0: scancode = SDL_SCANCODE_0; break;
+        case KEY_1: scancode = SDL_SCANCODE_1; break;
+        case KEY_2: scancode = SDL_SCANCODE_2; break;
+        case KEY_3: scancode = SDL_SCANCODE_3; break;
+        case KEY_4: scancode = SDL_SCANCODE_4; break;
+        case KEY_5: scancode = SDL_SCANCODE_5; break;
+        case KEY_6: scancode = SDL_SCANCODE_6; break;
+        case KEY_7: scancode = SDL_SCANCODE_7; break;
+        case KEY_8: scancode = SDL_SCANCODE_8; break;
+        case KEY_9: scancode = SDL_SCANCODE_9; break;
+        case KEY_LEFT: scancode = SDL_SCANCODE_LEFT; break;
+        case KEY_RIGHT: scancode = SDL_SCANCODE_RIGHT; break;
+        case KEY_UP: scancode = SDL_SCANCODE_UP; break;
+        case KEY_DOWN: scancode = SDL_SCANCODE_DOWN; break;
+        default: return false;
         }
 
-        std::stringstream final_msg;
-        final_msg << "Processed " << processed_count << " events total";
-        internal::debug_log("Input_Stage::process_pending_events", final_msg.str());
+        // If current_key_state is somehow not initialized yet
+        if (!current_key_state) {
+            return false;
+        }
+
+        return current_key_state[scancode];
     }
 
     void Input_Stage::cleanup()
@@ -287,23 +304,15 @@ namespace udit::engine
         internal::debug_log("Input_Stage::cleanup", "Starting cleanup");
 
         scene.get_input_event_queue().clear();
-        internal::debug_log("Input_Stage::cleanup", "Cleared scene input event queue");
-
         key_events.clear();
-        internal::debug_log("Input_Stage::cleanup", "Cleared key events");
 
-        // Clear pending events
-        {
-            std::lock_guard<std::mutex> lock(events_mutex);
-            std::queue<Event_Data> empty;
-            pending_events.swap(empty);
-            internal::debug_log("Input_Stage::cleanup", "Cleared pending events");
-        }
+        // Clear keyboard state tracking
+        previous_key_state.clear();
 
         internal::debug_log("Input_Stage::cleanup", "Cleanup completed");
     }
 
-    // Keep the existing registration code unchanged
+    // Registration code (unchanged from original implementation)
     template<>
     Stage::Unique_Ptr Stage::create< Input_Stage >(Scene& scene)
     {

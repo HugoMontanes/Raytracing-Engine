@@ -1,10 +1,3 @@
-/*
- * Copyright © 2025+ ÁRgB (angel.rodriguez@udit.es)
- *
- * Distributed under the Boost Software License, version 1.0
- * See ./LICENSE or www.boost.org/LICENSE_1_0.txt
- */
-
 #pragma once
 
 #include <engine/Key_Event.hpp>
@@ -13,41 +6,46 @@
 #include <iostream>
 #include <atomic>
 #include <future>
+#include <vector>
+
+// Add this include for SDL types
+#include <SDL3/SDL.h>
 
 namespace udit::engine
 {
-
     class Input_Stage : public Stage
     {
         using Key_Event_Pool = Input_Event::Queue_Pool< Key_Event >;
 
     private:
-
         Key_Event_Pool key_events;
 
-        // Event processing queue
-        struct Event_Data {
-            Key_Code code;
-            Key_Event::State state;
-        };
+        // Keyboard state tracking - now SDL types will be recognized
+        const bool* current_key_state;
+        std::vector<bool> previous_key_state;
+        int num_keys; // Total number of keys to track
 
-        std::queue<Event_Data> pending_events;
-        std::mutex events_mutex;
+        // Convert SDL scancode to our Key_Code enum
+        Key_Code scancode_to_key_code(SDL_Scancode scancode);
+
+        // Process keyboard state changes
+        void process_keyboard_state();
+
+        // Process other SDL events
+        void process_sdl_events();
 
     public:
-
         Input_Stage(Scene& scene)
-            :Stage(scene){}
+            : Stage(scene),
+            current_key_state(nullptr),
+            num_keys(0)
+        {}
 
         void prepare() override;
+        void compute(float delta_time) override;
+        void cleanup() override;
 
-        void compute (float) override;
-
-        void cleanup () override;
-
-    private:
-
-        void process_pending_events();
+        // Direct access to check if a key is currently pressed
+        bool is_key_pressed(Key_Code key_code);
     };
-
 }

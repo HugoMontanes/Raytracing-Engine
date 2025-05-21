@@ -11,6 +11,11 @@
 #include <engine/declarations.hpp>
 #include <engine/math.hpp>
 
+ // Forward declare the Input_Stage
+namespace udit::engine {
+    class Input_Stage;  // Forward declaration
+}
+
 namespace udit
 {
 
