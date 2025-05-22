@@ -88,23 +88,9 @@ namespace udit::engine
 
         unsigned int              rays_per_pixel;
 
-        bool continuous_rendering_enabled;  // Whether continuous updates are active
-        float target_display_fps;          // Target display update rate
-
-        mutable std::mutex performance_mutex;
-        float last_frame_time;
-        int frames_since_resize;
-
     public:
 
         Path_Tracing(Scene & scene);
-
-        ~Path_Tracing()
-        {
-            if (continuous_rendering_enabled) {
-                disable_continuous_rendering();
-            }
-        }
 
     public:
 
@@ -113,33 +99,10 @@ namespace udit::engine
             rays_per_pixel = new_rays_per_pixel;
         }
 
-        unsigned get_rays_per_pixel() const
-        {
-            return rays_per_pixel;
-        }
-
-        void enable_continuous_rendering(float display_fps = 30.0f);
-        void disable_continuous_rendering();
-        bool is_continuous_rendering_enabled() const;
-
-        // Fine-tuning methods for performance optimization
-        void set_display_fps(float fps);
-        float get_display_fps() const;
-
-        // Performance monitoring methods
-        float get_last_frame_time() const;
-        bool is_performance_stable() const;
-
     public:
 
         Component * create_camera_component (Entity & entity, Camera::Sensor_Type sensor_type, float focal_length);
         Component * create_model_component  (Entity & entity);
-
-    private:
-
-        void initialize_continuous_rendering();
-        void shutdown_continuous_rendering();
-        bool should_restart_continuous_rendering() const;
 
     };
 
