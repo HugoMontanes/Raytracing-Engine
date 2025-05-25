@@ -188,7 +188,7 @@ namespace udit::raytracer
             }
         }
 
-        // Update benchmark counter once per tile (dramatically reduces contention)
+        // Update benchmark counter once per tile 
         benchmark.emitted_ray_count.fetch_add(local_ray_count, std::memory_order_relaxed);
 
         auto end_time = std::chrono::high_resolution_clock::now();

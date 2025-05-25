@@ -249,7 +249,7 @@ namespace udit::engine
                 });
         }
 
-        // Process each model in parallel (fixed to use model_components instead of camera_components)
+        // Process each model in parallel
         for (auto& model : subsystem->model_components)
         {
             submit_task([this, &model]() {
